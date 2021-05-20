@@ -3,29 +3,32 @@ import csv
 from collections import Counter
 from collections import OrderedDict
 from collections import defaultdict
+import csv
 
-data = sys.stdin.readlines()
-lines = list(csv.reader(data, delimiter=','))
+
+
+with open('input5.txt', newline='') as f:
+    reader = csv.reader(f)
+    data = list(reader)
+
+with open('output5.txt') as f:
+    reader = csv.reader(f)
+    a = list(reader)
+
+output = []
+for i in a:
+    output.append(int(i[0]))
 
 train_data = []
 test_data = []
 
-for ci,i in enumerate(lines):
-    if ci != 0:
-        temp = []
-        for j in i[1:]:
-            temp.append(int(j))
-        if i[17] == '-1':
-            test_data.append(temp)
-        else:
-            train_data.append(temp)
-    else:
-        continue
-            
 
-train_label = list([i[16] for ci,i in enumerate(train_data)])
+train_data = [list(map(int, i[1:])) for i in data[1:] if i[17] != '-1']
+test_data = [list(map(int, i[1:])) for i in data[1:] if i[17] == '-1']
+
 N = len(train_data)
 
+train_label = list(zip(*train_data))[-1]
 label = defaultdict(int)
 py = defaultdict(float)
 feature_key = OrderedDict()
@@ -59,14 +62,12 @@ for line in train_data:
                 feature_count[(key[0],j)] += 1
 
 
-label_data = defaultdict(list)
+label_data = OrderedDict()
 
 for lab in range(1,8):
     label_data[lab] = []
-    for j in train_data:
-        if j[16] == lab:
-            label_data[j[16]].append(j)
-        
+for j in train_data:
+    label_data[j[-1]].append(j)
 
 
 pxy_count = defaultdict(int)
@@ -106,12 +107,17 @@ for ci, i in enumerate(test_data):
         argmax_l[temp*py[lab]] = lab
     max_l.append(argmax_l[max(argmax_l.keys())])
 
+diff = 0
 
+for (i,j) in zip(max_l,output):
+    print("Predicted: ", int(i)," Labels: ",int(j))
+    diff = int(i) - int(j)
 
-for i in max_l:
-    print(int(i))
-
+print("Naive Bayes Model Accuracy: ", (1-diff)*100, "%")
 
         
-
         
+
+
+
+
